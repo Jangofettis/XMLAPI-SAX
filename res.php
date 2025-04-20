@@ -5,40 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Respons</title>
     <style>
+        /* Grundinställningar för tabellen */
         table {
             width: 100%;
             border-collapse: collapse;
             font-family: Arial, sans-serif;
         }
-        th, td {
+        td {
             border: 1px solid #ddd;
-            padding: 10px;
             vertical-align: top;
+            padding: 0;
         }
+
+        /* Vänsterkolumnen med tidningsinfo */
         .newspaper-info {
-            width: 25%; /* Kolumn för tidningsnamn och edition */
+            color: #000;
             font-weight: bold;
+            padding: 10px;
+            width: 180px;
+            white-space: pre-line; /* tillåter radbrytningar */
         }
+
+        /* Wrappar varje artikel för marginal och skugga */
         .story {
-            margin: 10px 0;
+            margin: 10px;
             padding: 10px;
             border: 1px solid #ccc;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            background-clip: padding-box;
         }
+
+        /* Olika bakgrund för News vs Review */
         .news {
-            background-color: #d9f7be; /* Ljusgrön för nyheter */
+            background-color: #FBF4E6; /* blekbeige */
         }
         .review {
-            background-color: #ffd6e7; /* Ljusrosa för recensioner */
+            background-color: #DDEBF7; /* ljusblå */
         }
-        h3 {
+
+        /* Rad allra överst i varje artikel-cell */
+        .story-header {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 0.5em;
+        }
+
+        /* Rubrik i artikeln */
+        .story h3 {
+            margin: 0 0 0.5em;
             font-size: 1.2em;
-            font-weight: bold;
-            margin: 0 0 10px;
         }
-        p {
-            font-size: 1em;
-            margin: 5px 0;
+        .story p {
+            margin: 0.3em 0;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -93,29 +112,34 @@
     xml_parse($parser, $data, true);
     xml_parser_free($parser);
 
-    echo "<table>";
+    echo '<table>';
     foreach ($articles as $newspaper => $articleList) {
-        echo "<tr><td colspan='" . count($articleList) . "' style='background-color: #f4b084; color: #000;'><strong>" . $newspaper . "</strong></td></tr>";
-        echo "<tr>";
+        // En rad per tidning, med en fast vänstercell + en cell per artikel
+        echo '<tr>';
+        echo '<td class="newspaper-info">' . $newspaper . '</td>';
         foreach ($articleList as $article) {
-            echo "<td>";
-            $class = strtolower($article['DESCRIPTION']);
-            echo "<div class='story $class'> news"; // Lägg till klassen här
-            // Lägg till en rad för ID, Date och Type
-            echo "<p>" . $article['ID'] . " " . $article['TIME'] . " " . $article['DESCRIPTION'] . "</p>";
+            $cls = strtolower($article['DESCRIPTION']); // "news" eller "review"
+            echo '<td>';
+            echo '<div class="story ' . $cls . '">';
+            // ID, datum, typ
+            echo '<div class="story-header">'
+                . $article['ID'] . ' '
+                . $article['TIME'] . ' '
+                . $article['DESCRIPTION']
+                . '</div>';
             // Rubrik
-            echo "<h3>" . $article['HEADING'] . "</h3>";
-            // Story
-            $paragraphs = explode("\n", $article['STORY']);
-            foreach ($paragraphs as $paragraph) {
-                echo "<p>" . $paragraph . "</p>";
+            echo '<h3>' . $article['HEADING'] . '</h3>';
+            // Bruten text i stycken
+            $paras = explode("\n", trim($article['STORY']));
+            foreach ($paras as $p) {
+                echo '<p>' . $p . '</p>';
             }
-            echo "</div>";
-            echo "</td>";
+            echo '</div>';
+            echo '</td>';
         }
-        echo "</tr>";
+        echo '</tr>';
     }
-    echo "</table>";
+    echo '</table>';
     ?>
 </body>
 </html>
